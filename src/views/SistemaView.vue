@@ -4,7 +4,7 @@
     import api from '../api.js';
 
     const router = useRouter();
-    const usuarioLogueado = ref('null');
+    const usuarioLogueado = ref(null);
     const listaClientes = ref([]);
     const listaProductos = ref([]);
 
@@ -23,6 +23,10 @@
         }
     });
 
+    const cerrarSesion = () => {
+        localStorage.removeItem('usuario');
+    };
+
     const cargarDatos = async () => {
         try {
             const c = await api.get('/clientes');
@@ -32,7 +36,7 @@
         } catch (e) { console.error(e); }
     };
 
-    const agregaerAlCarrito = () => {
+    const agregarAlCarrito = () => {
         if (!clienteSeleccionado.value || !productoSeleccionado.value) return;
         const producto = listaProductos.value.find(p => p.id === productoSeleccionado.value);
         carrito.value.push({

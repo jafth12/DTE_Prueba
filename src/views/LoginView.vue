@@ -18,17 +18,17 @@
 
             router.push('/sistema');
         } catch (error) {
-            error.Login.value = 'Usuario o contraseña incorrectos';
+            errorLogin.value = 'Usuario o contraseña incorrectos';
         }
     };
 </script>
 
 <template>
-    <div class="Login-box">
+    <div class="login-box">
         <h1>Bienvenido</h1>
         <p>Sistema de facturacion_DTE</p>
 
-    <div class="from-group">
+    <div class="form-group">
         <label>Usuario:</label>
         <input v-model="usernameInput" type="text" placeholder="Ej: admin">
     </div>
