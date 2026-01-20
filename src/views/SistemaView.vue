@@ -16,10 +16,8 @@
     const cantidad = ref(1);
     const carrito = ref([]);
 
-
     const formCliente = ref({ nombre: '', nit_dui: '', correo: ''});
     const formProducto = ref({ nombre: '', precio: ''});
-
 
     onMounted(() => {
         const usuarioGuardado = localStorage.getItem('usuario');
@@ -33,6 +31,7 @@
 
     const cerrarSesion = () => {
         localStorage.removeItem('usuario');
+        router.push('/');
     };
 
     const cargarDatos = async () => {
@@ -44,8 +43,6 @@
         } catch (e) { console.error(e); }
     };
 
-
-
     const agregarAlCarrito = () => {
         if (!clienteSeleccionado.value || !productoSeleccionado.value) return;
         const producto = listaProductos.value.find(p => p.id === productoSeleccionado.value);
@@ -54,7 +51,7 @@
             nombre: producto.nombre, 
             precio: producto.precio,
             cantidad: cantidad.value,
-            subtotal: producto.precio * cantidad.value
+            subtotal: (producto.precio * cantidad.value).toFixed(2)
         });
     };
 
@@ -63,7 +60,7 @@
     });
 
     const procesarFactura = async () => {
-        if(carrito.value.length ===0 )return alert("Carrito vacio");
+        if(carrito.value.length === 0 ) return alert("Carrito vacio");
         try{
             await api.post('/facturas/crear', {
                 cliente_id: clienteSeleccionado.value,
@@ -86,25 +83,24 @@
             await api.post('/clientes', formCliente.value);
             alert("Cliente guardado correctamente");
             formCliente.value = { nombre: '', nit_dui: '', correo: ''};
+            cargarDatos(); // Actualizamos la lista
             vistaActual.value = 'menu';
         } catch (error) {
-            alert("Error:" + error.response?.message || error.message);
+            alert("Error:" + (error.response?.message || error.message));
         }
     };
-
 
     const guardarProducto = async () => {
         try {
             await api.post('/productos', formProducto.value);
             alert("Producto agregado al inventario");
             formProducto.value = { nombre: '', precio: '' };
-            cargarDatos();
+            cargarDatos(); // Actualizamos la lista
             vistaActual.value = 'menu';
         } catch (error) {
             alert ("Error al guardar producto");
         }
     };
-
 </script>
 
 <template>
@@ -120,7 +116,6 @@
     
     <main>
 
-
         <div v-if="vistaActual === 'menu'" class="menu-grid">
 
             <div class="tarjeta-menu" @click="vistaActual = 'facturar'">
@@ -130,6 +125,12 @@
             </div>
 
             <div class="tarjeta-menu" @click="vistaActual = 'nuevo-cliente'">
+                <div class="icono">👤</div>
+                <h3>Nuevo Cliente</h3>
+                <p>Registrar Cliente</p>
+            </div>
+
+            <div class="tarjeta-menu" @click="vistaActual = 'nuevo-producto'">
                 <div class="icono">📦</div>
                 <h3>Nuevo Producto</h3>
                 <p>Agregar al inventario</p>
@@ -137,72 +138,74 @@
         </div>
 
         <div v-if="vistaActual === 'facturar'" class="formulario-box">
+            <h3>Nueva Factura</h3>
 
-        <div class="fila">
-            <label>Cliente:</label>
-            <select v-model="clienteSeleccionado">
-                <option value="">Seleccione un cliente...</option>
-                <option v-for="c in listaClientes" :key="c.id" :value="c.id">{{ c.nombre }}</option>
-            </select>
+            <div class="fila">
+                <label>Cliente:</label>
+                <select v-model="clienteSeleccionado">
+                    <option value="">Seleccione un cliente...</option>
+                    <option v-for="c in listaClientes" :key="c.id" :value="c.id">{{ c.nombre }}</option>
+                </select>
+            </div>
+
+            <div class="fila fondo-gris">
+                <label>Agregar Item:</label>
+                <select v-model="productoSeleccionado">
+                     <option value="">Producto...</option>
+                    <option v-for="p in listaProductos" :key="p.id" :value="p.id">{{ p.nombre }} - ${{ p.precio }}</option>
+                </select>
+                <input type="number" v-model="cantidad" min="1" style="width: 70px;">
+                <button @click="agregarAlCarrito" class="btn-add">Agregar</button>
+            </div>
+
+            <table class="tabla-carrito" v-if="carrito.length > 0">
+               <thead><tr><th>Producto</th><th>Cant</th><th>SubTotal</th></tr></thead>
+               <tbody>
+                <tr v-for="(item, index) in carrito" :key="index">
+                    <td>{{ item.nombre }}</td>
+                    <td>{{ item.cantidad }}</td>
+                    <td>${{ item.subtotal }}</td>
+                </tr>
+               </tbody>
+            </table>
+
+            <div class="total-box" v-if="carrito.length > 0">
+                <h3>Total a Pagar: ${{ totalFactura }}</h3>
+                <button @click="procesarFactura" class="btn-success">EMITIR FACTURA DTE</button>
+            </div>
+        </div> 
+
+        <div v-if="vistaActual === 'nuevo-cliente'" class="formulario-box">
+            <h3>Registrar Nuevo cliente</h3>
+            <div class="form-group">
+                <label>Nombre Completo</label>
+                <input v-model="formCliente.nombre" type="text" placeholder="ejemplo">
+            </div>
+
+            <div class="form-group">
+                <label>DUI o NIT:</label>
+                <input v-model="formCliente.nit_dui" type="text" placeholder="0000-000000-000-0">
+            </div>
+
+            <div class="form-group">
+                <label>Correo Electronico Para DTE:</label>
+                <input v-model="formCliente.correo" type="text" placeholder="ejemplo@gmail.com">
+            </div>
+            <button @click="guardarCliente" class="btn-primary">Guardar Cliente</button>
         </div>
 
-        <div class="fila fondo-gris">
-            <label>Agregar Item:</label>
-            <select v-model="productoSeleccionado">
-                 <option value="">Producto...</option>
-                <option v-for="p in listaProductos" :key="p.id" :value="p.id">{{ c.nombre }} - ${{ p.precio }}</option>
-            </select>
-            <input type="number" v-model="cantidad" min="1" style="width: 70px;">
-            <button @click="agregarAlCarrito" class="btn-add">Agregar</button>
+        <div v-if="vistaActual === 'nuevo-producto'" class="formulario-box">
+            <h3>Agregar Nuevo Producto</h3>
+            <div class="form-group">
+                <label>Nombre del Producto:</label>
+                <input v-model="formProducto.nombre" type="text" placeholder="Ej: Teclado USB">
+            </div>
+            <div class="form-group">
+                <label>Precio Unitario ($):</label>
+                <input v-model="formProducto.precio" type="number" step="0.01" placeholder="0.00">
+            </div>
+            <button @click="guardarProducto" class="btn-primary">Guardar Producto</button>
         </div>
-
-        <table class="total-box" v-if="carrito.length > 0">
-           <thead><tr><th>Producto</th><th>Cant</th><th>SubTotal</th></tr></thead>
-           <tbody>
-            <tr v-for="(item, index) in carrito" :key="index">
-                <td>{{ item.nombre }}</td>
-                <td>{{ item.cantidad }}</td>
-                <td>{{ item.subtotal }}</td>
-            </tr>
-           </tbody>
-        </table>
-
-        <div class="total-box" v-if="carrito.length > 0">
-            <h3>Total a Pagar: ${{ totalFactura }}</h3>
-            <button @click="procesarFactura" class="btn-success">EMITIR FACTURA DTE</button>
-        </div>
-       </div> 
-       <div v-if="vistaActual === 'nuevo-cliente'" class="formulario-box">
-        <h3>Registrar Nuevo cliente</h3>
-        <div class="form-group">
-            <label>Nombre Completo</label>
-            <input v-model="formCliente.nombre" type="text" placeholder="ejemplo">
-        </div>
-
-        <div class="form-group">
-            <label>DUI o NIT:</label>
-            <input v-model="formCliente.nit_dui" type="text" placeholder="0000-000000-000-0">
-        </div>
-
-        <div class="form-group">
-            <label>Correo Electronico Para DTE:</label>
-            <input v-model="formCliente.correo" type="text" placeholder="ejemplo@gmail.com">
-        </div>
-        <button @click="guardarCliente" class="btn-primary">Guardar Cliente</button>
-       </div>
-
-       <div v-if="vistaActual === 'nuevo-producto'" class="formulario-box">
-        <h3>Agregar Nuevo Producto</h3>
-        <div class="form-group">
-            <label>Nombre del Producto:</label>
-            <input v-model="formProducto.nombre" type="text" placeholder="Ej: Teclado USB">
-        </div>
-        <div class="form-group">
-            <label>Precio Unitario ($):</label>
-            <input v-model="formProducto.precio" type="number" step="0.01" placeholder="0.00">
-        </div>
-        <button @click="guardarProducto" class="btn-primary">Guardar Producto</button>
-    </div>
 
     </main>
   </div>
