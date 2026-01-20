@@ -14,7 +14,7 @@ router.get('/productos', productoController.getAllProductos)
 router.post('/facturas/crear', facturaController.crearFactura);
 router.post('/login', usuarioController.login);
 router.post('/clientes', clienteController.crearCliente);
-router.post('productos', productoController.crearProducto);
+router.post('/productos', productoController.crearProducto);
 
 
 router.use((req, res) => {

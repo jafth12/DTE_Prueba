@@ -69,7 +69,8 @@
                 cliente_id: clienteSeleccionado.value,
                 items: carrito.value.map(i => ({
                     producto_id: i.productoId,
-                    precio: i.precio
+                    precio: i.precio,
+                    cantidad: i.cantidad
                 }))
             });
             alert("!Factura DTE Creada con Exito");
@@ -128,7 +129,7 @@
                 <p>Crear DTE Consumidor Final</p>
             </div>
 
-            <div class="tajeta-menu" @click="vistaActual = 'nuevo-cliente'">
+            <div class="tarjeta-menu" @click="vistaActual = 'nuevo-cliente'">
                 <div class="icono">📦</div>
                 <h3>Nuevo Producto</h3>
                 <p>Agregar al inventario</p>
@@ -149,7 +150,7 @@
             <label>Agregar Item:</label>
             <select v-model="productoSeleccionado">
                  <option value="">Producto...</option>
-                <option v-for="c in listaProductos" :key="p.id" :value="p.id">{{ c.nombre }} - ${{ p.precio }}</option>
+                <option v-for="p in listaProductos" :key="p.id" :value="p.id">{{ c.nombre }} - ${{ p.precio }}</option>
             </select>
             <input type="number" v-model="cantidad" min="1" style="width: 70px;">
             <button @click="agregarAlCarrito" class="btn-add">Agregar</button>

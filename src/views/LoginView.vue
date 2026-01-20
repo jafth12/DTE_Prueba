@@ -33,14 +33,14 @@
         <input v-model="usernameInput" type="text" placeholder="Ej: admin">
     </div>
     
-    <div class="from-group">
+    <div class="form-group">
         <label>contraseña:</label>
         <input v-model="passwordInput" type="password" placeholder="Ej: 1234">
     </div>
 
     <p v-if="errorLogin" class="error">{{ errorLogin }}</p>
 
-    <button @click="iniciarSesion" class="btn-primario">Entrar</button>
+    <button @click="iniciarSesion" class="btn-primary">Entrar</button>
     </div>
 </template>
 
