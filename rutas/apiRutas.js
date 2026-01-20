@@ -4,10 +4,12 @@ const router = express.Router();
 const clienteController = require('../controladores/clienteController');
 const productoController = require('../controladores/productoController')
 const facturaController = require('../controladores/facturaController');
+const usuarioController = require('../controladores/usuarioController');
 
 router.get('/clientes', clienteController.getAllClientes);
 router.get('/productos', productoController.getAllProductos)
 router.post('/facturas/crear', facturaController.crearFactura);
+router.post('/login', usuarioController.login);
 
 router.use((req, res) => {
     res.status(400).json({
