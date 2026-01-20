@@ -1,4 +1,3 @@
-require('dotenv').config({path: './.env'});
 const mysql = require('mysql2');
 
 const pool = mysql.createPool({
@@ -12,6 +11,6 @@ const pool = mysql.createPool({
 
 const promisePool = pool.promise();
 
-console.log("Conectado al abase de datos MySQL");
+console.log("Conectado al a base de datos MySQL");
 
 module.exports = promisePool;
